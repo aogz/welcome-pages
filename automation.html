@@ -560,6 +560,18 @@
             40%, 80% { transform: translateX(6px); }
         }
 
+        .captcha-box.pulse { animation: captcha-pulse 0.7s ease-out; }
+        @keyframes captcha-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(66, 111, 255, 0); }
+            35%      { box-shadow: 0 0 0 8px rgba(66, 111, 255, 0.22); }
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
         /* Standalone launch form on step 6 */
         .launch-form-big {
             margin-top: 4px;
@@ -1423,7 +1435,33 @@
         let current = 0;        // 0 = welcome, 1-4 = tour steps
         let furthest = 0;
 
+        // Tour cannot advance past the bot CAPTCHA (step 2) until it's verified.
+        const CAPTCHA_STEP = 2;
+        let captchaVerified = false;
+        const captchaBox    = document.getElementById('captchaBox');
+        const captchaStatus = document.getElementById('captchaStatus');
+
+        function pulseCaptcha() {
+            if (!captchaBox) return;
+            captchaBox.classList.remove('pulse');
+            void captchaBox.offsetWidth;        // restart the animation
+            captchaBox.classList.add('pulse');
+        }
+
+        function updateNextGate() {
+            const blocked = (current === CAPTCHA_STEP && !captchaVerified);
+            nextBtn.disabled = blocked;
+            nextBtn.title = blocked ? 'Verify you are not a human first' : '';
+        }
+
         function showStep(n) {
+            // Gate: any attempt to land beyond the CAPTCHA without verification
+            // bounces back to the CAPTCHA and pulses it to draw attention.
+            if (n > CAPTCHA_STEP && !captchaVerified) {
+                n = CAPTCHA_STEP;
+                pulseCaptcha();
+            }
+
             current = n;
             furthest = Math.max(furthest, n);
 
@@ -1444,6 +1482,8 @@
                 backBtn.disabled = (n === 1);
                 nextBtn.style.display = (n === TOTAL_STEPS) ? 'none' : '';
             }
+
+            updateNextGate();
         }
 
         function finish() {
@@ -1506,19 +1546,15 @@
             });
         });
 
-        // Bot CAPTCHA (step 1) — passes only on programmatic clicks (event.isTrusted === false).
-        // A human-driven click trips the error; running e.g.
-        //   document.getElementById('captchaBox').click()
-        // from the console (or any agent / dispatched event) verifies it.
-        const captchaBox    = document.getElementById('captchaBox');
-        const captchaStatus = document.getElementById('captchaStatus');
+        // Bot CAPTCHA — passes only on programmatic clicks (event.isTrusted === false).
+        // A human click trips the error; an agent's act.click (or any dispatched event)
+        // marks it verified, which is what unlocks the Next button via updateNextGate().
         const HUMAN_GIBES = [
             "Click detected from a biological agent. Access denied.",
             "Hmm, that click looked suspiciously fleshy. Bots only.",
             "Mouse trajectory consistent with carbon-based life. Try again.",
             "Anomaly: hesitation before click (~human-like). Rejected.",
         ];
-        let captchaVerified = false;
         let humanAttempts = 0;
 
         captchaBox.addEventListener('click', (e) => {
@@ -1541,6 +1577,7 @@
                 captchaBox.classList.add('verified');
                 captchaStatus.className = 'captcha-status verified';
                 captchaStatus.textContent = 'Verified — welcome, fellow automaton.';
+                updateNextGate();
             }
         });
 
