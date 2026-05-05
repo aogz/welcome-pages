@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#f9fafb" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1b1c" media="(prefers-color-scheme: dark)">
+    <title>Welcome to your assisted space</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+        }
+
+        /* Floating soft orbs in background */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.25;
+            pointer-events: none;
+            animation: float 22s infinite ease-in-out;
+        }
+        .orb-1 { width: 380px; height: 380px; background: #fdeedf; top: -120px; left: -80px; }
+        .orb-2 { width: 300px; height: 300px; background: #fbc59a; bottom: -100px; right: -80px; animation-delay: -7s; }
+        .orb-3 { width: 220px; height: 220px; background: #fdeedf; top: 60%; left: 55%; animation-delay: -14s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%      { transform: translate(40px, -30px) scale(1.08); }
+            66%      { transform: translate(-30px, 40px) scale(0.94); }
+        }
+
+        .stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        /* ---------- Step visibility ---------- */
+        /* Any element with data-step is a tour step; hidden by default */
+        [data-step] {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.35s ease, visibility 0s linear 0.35s, transform 0.35s ease;
+        }
+        [data-step].active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transition: opacity 0.35s ease, visibility 0s, transform 0.35s ease;
+        }
+
+        /* ---------- Centered welcome + launch cards (steps 0 and 6) ---------- */
+        .welcome-card {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            width: calc(100% - 80px);
+            max-width: 520px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 48px 56px;
+            text-align: center;
+            border: 1px solid #e8e8e9;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        }
+        .welcome-card.active {
+            animation: welcome-pop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes welcome-pop-in {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9) translateY(12px); }
+            to   { opacity: 1; transform: translate(-50%, -50%) scale(1)   translateY(0); }
+        }
+        @keyframes pop-in {
+            from { opacity: 0; transform: scale(0.9) translateY(12px); }
+            to   { opacity: 1; transform: scale(1)   translateY(0); }
+        }
+
+        .wave-badge {
+            display: inline-flex;
+            width: 88px;
+            height: 88px;
+            align-items: center;
+            justify-content: center;
+            background: #fdeedf;
+            border-radius: 50%;
+            margin-bottom: 24px;
+            transform-origin: 70% 70%;
+            animation: wave 2.4s ease-in-out infinite;
+        }
+        .wave-badge i {
+            font-size: 38px;
+            color: #f08030;
+        }
+        @keyframes wave {
+            0%, 60%, 100% { transform: rotate(0deg); }
+            10%           { transform: rotate(-14deg); }
+            20%           { transform: rotate(12deg); }
+            30%           { transform: rotate(-10deg); }
+            40%           { transform: rotate(8deg); }
+            50%           { transform: rotate(0deg); }
+        }
+
+        .welcome-card h1 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            color: #111827;
+            margin-bottom: 12px;
+            line-height: 1.15;
+        }
+        .welcome-card h1 .accent { color: #f08030; }
+        .welcome-card p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #4b5563;
+            margin-bottom: 20px;
+        }
+        .welcome-card p.subtext {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 28px;
+        }
+
+        /* Permanent URL pill */
+        .url-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        .url-pill > i.fa-link {
+            color: #f08030;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .url-pill .url-text {
+            flex: 1;
+            font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 13px;
+            color: #1f2937;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .copy-btn {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.15s ease, color 0.15s ease;
+            flex-shrink: 0;
+        }
+        .copy-btn:hover    { background: #e5e7eb; color: #1f2937; }
+        .copy-btn.copied   { color: #f08030; background: #fdeedf; }
+
+        /* ---------- Step 5: "Make it your own" info card ---------- */
+        .info-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 28px 30px;
+            max-width: 460px;
+            border: 1px solid #e8e8e9;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+            text-align: center;
+        }
+        .info-badge {
+            display: inline-flex;
+            width: 56px;
+            height: 56px;
+            align-items: center;
+            justify-content: center;
+            background: #fdeedf;
+            color: #f08030;
+            border-radius: 50%;
+            margin-bottom: 14px;
+            font-size: 22px;
+        }
+        .info-card h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #111827;
+            letter-spacing: -0.4px;
+            margin-bottom: 6px;
+        }
+        .info-card > p {
+            font-size: 14px;
+            line-height: 1.55;
+            color: #4b5563;
+            margin-bottom: 18px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        .feature {
+            background: #f9fafb;
+            border: 1px solid #eff1f5;
+            border-radius: 10px;
+            padding: 12px 10px;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+        .feature:hover {
+            border-color: #fbc59a;
+            background: #ffffff;
+        }
+        .feature i {
+            color: #f08030;
+            font-size: 15px;
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+        .feature h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 3px;
+            letter-spacing: -0.2px;
+        }
+        .feature p {
+            font-size: 11.5px;
+            line-height: 1.45;
+            color: #4b5563;
+        }
+
+        .examples-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fdeedf;
+            color: #c05e10;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+        .tag i { font-size: 10px; }
+
+        /* ---------- Step 5: Active sessions queue mock ---------- */
+        .queue-card {
+            max-width: 640px;
+            text-align: left;
+            padding: 28px 32px;
+        }
+        .queue-header { margin-bottom: 18px; }
+        .queue-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #111827;
+            letter-spacing: -0.3px;
+        }
+        .queue-title > i:first-child {
+            color: #f08030;
+            font-size: 16px;
+        }
+        .queue-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 7px;
+            background: #f3f4f6;
+            color: #4b5563;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .queue-subtitle {
+            font-size: 13.5px;
+            color: #4b5563;
+            margin-top: 6px;
+            line-height: 1.55;
+            margin-bottom: 0;
+        }
+
+        .queue-table {
+            border: 1px solid #eef0f3;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 18px;
+            background: #ffffff;
+        }
+        .queue-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1.1fr 0.8fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 14px;
+            border-bottom: 1px solid #eef0f3;
+            font-size: 13px;
+        }
+        .queue-row:last-child { border-bottom: none; }
+        .queue-row.queue-head {
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 9px 14px;
+        }
+        .queue-row.queue-head i {
+            font-size: 11px;
+            margin-right: 5px;
+            opacity: 0.7;
+        }
+
+        .qcol-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #1f2937;
+            font-weight: 600;
+        }
+        .qavatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #fdeedf;
+            color: #c05e10;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11.5px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .qdot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .qdot-green  { background: #16a34a; }
+        .qdot-orange { background: #f08030; }
+        .qdot-red    { background: #dc2626; }
+
+        .qcol-wait { color: #4b5563; }
+        .qcol-pin {
+            font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+            color: #4b5563;
+            font-size: 12.5px;
+        }
+        .qcol-act {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .qpick {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            color: #1f2937;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+        .qpick i { font-size: 10px; }
+        .queue-row:not(.queue-head):hover .qpick {
+            background: #fdeedf;
+            border-color: #fbc59a;
+            color: #c05e10;
+        }
+
+        .queue-cta {
+            text-decoration: none;
+        }
+
+        /* Rocket badge (step 6) */
+        .rocket-badge {
+            animation: rocket-fly 2.4s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        /* Standalone launch form on step 6 */
+        .launch-form-big {
+            margin-top: 4px;
+            text-align: left;
+        }
+        .launch-row {
+            display: flex;
+            gap: 10px;
+        }
+        .launch-input-wrap {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        .launch-input-wrap > i {
+            position: absolute;
+            left: 16px;
+            color: #6b7280;
+            font-size: 14px;
+            pointer-events: none;
+        }
+        .launch-input-wrap input {
+            width: 100%;
+            padding: 14px 16px 14px 42px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #ffffff;
+            font-family: inherit;
+            font-size: 15px;
+            color: #1f2937;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .launch-input-wrap input:focus {
+            outline: none;
+            border-color: #f08030;
+            box-shadow: 0 0 0 3px rgba(240, 128, 48, 0.18);
+        }
+        .launch-btn-big { flex-shrink: 0; }
+
+        /* ---------- Buttons ---------- */
+        .cta,
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #f08030;
+            color: white;
+            padding: 13px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.15s ease;
+        }
+        .cta:hover,
+        .btn-primary:hover    { background: #c05e10; }
+        .cta:active,
+        .btn-primary:active   { transform: translateY(1px); }
+        .cta i,
+        .btn-primary i        { font-size: 13px; transition: transform 0.2s ease; }
+        .cta:hover i,
+        .btn-primary:hover i  { transform: translateX(3px); }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            color: #1f2937;
+            padding: 11px 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease, color 0.15s ease;
+        }
+        .btn-secondary:hover   { background: #f9fafb; border-color: #fbc59a; }
+        .btn-secondary:active  { transform: translateY(1px); }
+        .btn-secondary:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: #4b5563;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            padding: 8px 4px;
+            transition: color 0.15s ease;
+        }
+        .btn-link:hover { color: #111827; }
+
+        .studio-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: -4px;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: #4b5563;
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+        .studio-link:hover { color: #f08030; }
+        .studio-link i     { font-size: 10px; opacity: 0.8; }
+
+        /* How-to-hide hint on the done state */
+        .dismiss-hint {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 18px;
+            padding: 8px 14px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            font-size: 12.5px;
+            color: #4b5563;
+            max-width: 92%;
+        }
+        .dismiss-hint > i.fa-lightbulb { color: #f3bf59; font-size: 12px; }
+        .step-seq {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .seq-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            color: #1f2937;
+            font-size: 11px;
+        }
+        .seq-sep {
+            color: #9ca3af;
+            font-size: 9px;
+        }
+        .seq-label {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 2px 8px;
+            color: #111827;
+            font-weight: 600;
+            font-size: 11.5px;
+        }
+
+        /* ---------- Callouts (steps 1-4) ---------- */
+        .callout {
+            position: absolute;
+            z-index: 6;
+            display: flex;
+            gap: 10px;
+        }
+        .callout.active {
+            animation: callout-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .callout .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 14px 18px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+            max-width: 260px;
+            border: 1px solid #e8e8e9;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .callout .card h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.2px;
+        }
+        .callout .card h3 i {
+            color: #f08030;
+            font-size: 15px;
+        }
+        .callout .card p {
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: #4b5563;
+        }
+
+        /* Hand-drawn SVG arrows */
+        .arrow-svg {
+            width: 180px;
+            height: 150px;
+            filter: url(#sketch);
+            animation: nudge 2.8s ease-in-out infinite;
+        }
+        .arrow-svg path,
+        .arrow-svg polygon {
+            stroke: #f08030;
+            fill: none;
+            stroke-width: 3.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .arrow-svg polygon { fill: #f08030; }
+
+        /* Draw-in animation so arrows feel sketched on screen */
+        .arrow-svg path {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+        }
+        .arrow-svg polygon {
+            opacity: 0;
+            transform-origin: center;
+        }
+        .callout.active .arrow-svg path {
+            animation: draw-line 0.95s cubic-bezier(0.65, 0.05, 0.36, 1) 0.1s forwards;
+        }
+        .callout.active .arrow-svg polygon {
+            animation: tip-in 0.3s ease-out 1s forwards;
+        }
+
+        @keyframes draw-line {
+            to { stroke-dashoffset: 0; }
+        }
+        @keyframes tip-in {
+            from { opacity: 0; transform: scale(0.4) rotate(-10deg); }
+            to   { opacity: 1; transform: scale(1)   rotate(0deg); }
+        }
+
+        /* Callout positioning */
+        .callout-tl { top: 32px; left: 32px;  flex-direction: column; align-items: flex-start; }
+        .callout-tr { top: 32px; right: 32px; flex-direction: column; align-items: flex-end; }
+        /* Tabs callout — positioned further right of the top-left corner */
+        .callout-tc {
+            top: 24px;
+            left: 190px;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        /* Video & Chat sits slightly left of the very top-right corner */
+        .callout-tr.tr-offset { right: 180px; }
+
+        /* All arrows point up and bob upward */
+        .callout .arrow-svg { animation-name: nudge-top; }
+
+        @keyframes nudge-top {
+            0%, 100% { transform: translate(0, 0); }
+            50%      { transform: translate(0, -10px); }
+        }
+
+        @keyframes callout-in {
+            from { opacity: 0; transform: scale(0.9); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        /* ---------- Tour navigation bar ---------- */
+        .tour-nav {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #ffffff;
+            border: 1px solid #e8e8e9;
+            border-radius: 14px;
+            padding: 12px 16px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s linear 0.3s, transform 0.3s ease;
+        }
+        .tour-nav.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+            transition: opacity 0.3s ease, visibility 0s, transform 0.3s ease;
+            animation: nav-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes nav-in {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .tour-nav .divider {
+            width: 1px;
+            height: 22px;
+            background: #e5e7eb;
+        }
+
+        .step-counter {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4b5563;
+            min-width: 56px;
+            text-align: center;
+            letter-spacing: 0.2px;
+        }
+        .step-counter .current { color: #f08030; }
+
+        .dots {
+            display: flex;
+            gap: 6px;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .dot:hover    { background: #fbc59a; }
+        .dot.active   { background: #f08030; transform: scale(1.25); }
+        .dot.visited  { background: #ffa875; }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ---------- Done state ---------- */
+        .done-state {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            color: #111827;
+            text-align: center;
+            padding: 40px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+        }
+        .done-state.visible {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.4s ease, visibility 0s;
+            animation: pop-in 0.5s ease-out;
+        }
+        .done-state .rocket {
+            width: 80px;
+            height: 80px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fdeedf;
+            color: #f08030;
+            border-radius: 50%;
+            font-size: 34px;
+            animation: rocket-fly 2s ease-in-out infinite;
+        }
+        @keyframes rocket-fly {
+            0%, 100% { transform: translateY(0) rotate(-10deg); }
+            50%      { transform: translateY(-8px) rotate(-18deg); }
+        }
+        .done-state h2 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.6px;
+            color: #111827;
+        }
+        .done-state p {
+            font-size: 15px;
+            color: #4b5563;
+            max-width: 420px;
+            line-height: 1.6;
+        }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 900px) {
+            .callout .card { max-width: 200px; padding: 12px 14px; }
+            .callout .card h3 { font-size: 13px; }
+            .callout .card p  { font-size: 11.5px; }
+            .arrow-svg        { width: 120px; height: 100px; }
+            .welcome-card     { padding: 36px 32px; max-width: 90%; }
+            .welcome-card h1  { font-size: 26px; }
+            .info-card        { padding: 32px 28px; max-width: 92%; }
+            .info-card h2     { font-size: 22px; }
+            .feature-grid     { grid-template-columns: 1fr; }
+            .queue-card       { padding: 24px 22px; max-width: 92%; }
+            .queue-row        { grid-template-columns: 1.4fr 1fr auto; gap: 10px; }
+            .queue-row .qcol-pin { display: none; }
+            .tour-nav         { gap: 12px; padding: 10px 12px; }
+        }
+        @media (max-width: 560px) {
+            .callout .card        { max-width: 180px; }
+            .welcome-card         { padding: 32px 24px; }
+            .info-card            { padding: 28px 20px; }
+            .tour-nav .btn-link   { display: none; }
+            .tour-nav .divider    { display: none; }
+            .step-counter         { min-width: 44px; font-size: 12px; }
+        }
+
+        /* ---------- Dark theme (follows OS preference) — base: #1a1b1c ---------- */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #1a1b1c;
+                color: #e5e7eb;
+            }
+
+            .orb-1 { background: #3d2010; opacity: 0.12; }
+            .orb-2 { background: #232426; opacity: 0.35; }
+            .orb-3 { background: #3d2010; opacity: 0.10; }
+
+            .welcome-card,
+            .info-card,
+            .callout .card,
+            .tour-nav {
+                background: #232426;
+                border-color: #2f3033;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            }
+
+            .welcome-card h1,
+            .info-card h2,
+            .callout .card h3,
+            .done-state h2 { color: #f3f4f6; }
+
+            .welcome-card h1 .accent,
+            .callout .card h3 i,
+            .feature i,
+            .url-pill > i.fa-link,
+            .step-counter .current { color: #ffa875; }
+
+            .welcome-card p,
+            .info-card > p,
+            .callout .card p,
+            .feature p,
+            .done-state p { color: #c9cbcf; }
+
+            .welcome-card p.subtext,
+            .step-counter,
+            .examples-label,
+            .studio-link,
+            .btn-link,
+            .launch-input-wrap > i { color: #9a9ca0; }
+
+            .wave-badge,
+            .info-badge,
+            .done-state .rocket {
+                background: #4a2a12;
+                color: #ffcaa0;
+            }
+
+            .url-pill {
+                background: #1a1b1c;
+                border-color: #2f3033;
+            }
+            .url-pill .url-text { color: #e5e7eb; }
+            .copy-btn { color: #9a9ca0; }
+            .copy-btn:hover  { background: #2f3033; color: #f3f4f6; }
+            .copy-btn.copied { background: #4a2a12; color: #ffcaa0; }
+
+            .cta,
+            .btn-primary            { background: #f08030; }
+            .cta:hover,
+            .btn-primary:hover      { background: #ffa875; }
+
+            .btn-secondary {
+                background: #232426;
+                color: #e5e7eb;
+                border-color: #2f3033;
+            }
+            .btn-secondary:hover    { background: #2a2b2e; border-color: #f08030; }
+            .btn-link:hover         { color: #f3f4f6; }
+            .studio-link:hover      { color: #ffa875; }
+
+            .callout .card          { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45); }
+            .callout:hover .card    {
+                border-color: #f08030;
+                box-shadow: 0 10px 24px rgba(255, 168, 117, 0.18);
+            }
+
+            .arrow-svg path,
+            .arrow-svg polygon      { stroke: #ffa875; }
+            .arrow-svg polygon      { fill: #ffa875; }
+
+            .tour-nav .divider      { background: #2f3033; }
+            .dot                    { background: #2f3033; }
+            .dot:hover              { background: #f08030; }
+            .dot.active             { background: #ffa875; }
+            .dot.visited            { background: #f08030; }
+
+            .feature {
+                background: #1a1b1c;
+                border-color: #2a2b2e;
+            }
+            .feature:hover {
+                background: #232426;
+                border-color: #f08030;
+            }
+            .feature h4             { color: #f3f4f6; }
+
+            .tag {
+                background: #4a2a12;
+                color: #ffcaa0;
+            }
+
+            .launch-input-wrap input {
+                background: #1a1b1c;
+                border-color: #2f3033;
+                color: #e5e7eb;
+            }
+            .launch-input-wrap input::placeholder { color: #737478; }
+            .launch-input-wrap input:focus {
+                border-color: #ffa875;
+                box-shadow: 0 0 0 3px rgba(255, 168, 117, 0.25);
+            }
+
+            .dismiss-hint {
+                background: #232426;
+                border-color: #2f3033;
+                color: #c9cbcf;
+            }
+            .seq-icon,
+            .seq-label {
+                background: #1a1b1c;
+                border-color: #2f3033;
+                color: #f3f4f6;
+            }
+            .seq-sep { color: #737478; }
+
+            /* Queue mock — dark mode */
+            .queue-title         { color: #f3f4f6; }
+            .queue-subtitle      { color: #c9cbcf; }
+            .queue-badge {
+                background: #2a2b2e;
+                color: #c9cbcf;
+            }
+            .queue-table {
+                background: #1f2022;
+                border-color: #2f3033;
+            }
+            .queue-row           { border-bottom-color: #2f3033; }
+            .queue-row.queue-head {
+                background: #1a1b1c;
+                color: #9a9ca0;
+            }
+            .qcol-name           { color: #f3f4f6; }
+            .qcol-wait,
+            .qcol-pin            { color: #c9cbcf; }
+            .qavatar {
+                background: #4a2a12;
+                color: #ffcaa0;
+            }
+            .qpick {
+                background: #1a1b1c;
+                border-color: #2f3033;
+                color: #e5e7eb;
+            }
+            .queue-row:not(.queue-head):hover .qpick {
+                background: #4a2a12;
+                border-color: #f08030;
+                color: #ffcaa0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- SVG filter for hand-drawn arrow effect -->
+    <svg width="0" height="0" style="position:absolute; left:-9999px" aria-hidden="true">
+        <defs>
+            <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="4" result="noise"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="stage">
+        <!-- Step 0: Welcome card -->
+        <div class="welcome-card" data-step="0">
+            <div class="wave-badge">
+                <i class="fa-solid fa-headphones"></i>
+            </div>
+            <h1>Hi <span class="accent">Ashish</span>, welcome to your assisted space</h1>
+            <p>This is your queue &mdash; visitors who need a hand on your site land here. Pick up sessions in parallel and assist them right inside their browser.</p>
+
+            <div class="url-pill">
+                <i class="fa-solid fa-link"></i>
+                <span class="url-text" id="meetingUrl">https://webfu.se/+ashish-support</span>
+                <button class="copy-btn" id="copyBtn" type="button" title="Copy link">
+                    <i class="fa-solid fa-copy"></i>
+                    <span id="copyLabel">Copy</span>
+                </button>
+            </div>
+
+            <p class="subtext">Let's take a quick tour so you know your way around.</p>
+
+            <button class="cta" id="startBtn" type="button">
+                Start the tour
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Step 1: Participants (top-left) — arrow points straight up -->
+        <div class="callout callout-tl" data-step="1">
+            <svg class="arrow-svg" viewBox="0 0 180 150">
+                <path pathLength="100" d="M 150 138 C 110 125, 60 100, 28 58 C 20 38, 22 20, 20 10"/>
+                <polygon points="20,8 8,28 32,28"/>
+            </svg>
+            <div class="card">
+                <h3><i class="fa-solid fa-users"></i> Participants</h3>
+                <p>See who's in your meeting and invite teammates or guests with a quick link.</p>
+            </div>
+        </div>
+
+        <!-- Step 2: Tabs (~100px from the top-left corner) — arrow points straight up -->
+        <div class="callout callout-tc" data-step="2">
+            <svg class="arrow-svg" viewBox="0 0 180 150">
+                <path pathLength="100" d="M 150 138 C 110 125, 60 100, 28 58 C 20 38, 22 20, 20 10"/>
+                <polygon points="20,8 8,28 32,28"/>
+            </svg>
+            <div class="card">
+                <h3><i class="fa-solid fa-plus"></i> Tabs</h3>
+                <p>Click the <b>+</b> to open a new tab, or click an existing tab to edit its URL.</p>
+            </div>
+        </div>
+
+        <!-- Step 3: Video & Chat (slightly left of top-right corner) — arrow points straight up -->
+        <div class="callout callout-tr tr-offset" data-step="3">
+            <svg class="arrow-svg" viewBox="0 0 180 150">
+                <path pathLength="100" d="M 30 138 C 70 125, 120 100, 152 58 C 160 38, 158 20, 160 10"/>
+                <polygon points="160,8 148,28 172,28"/>
+            </svg>
+            <div class="card">
+                <h3><i class="fa-solid fa-video"></i> Video &amp; Chat</h3>
+                <p>Start a video call, turn on your mic, or send a message to the room.</p>
+            </div>
+        </div>
+
+        <!-- Step 4: Settings & Exit (top-right corner) — arrow points straight up -->
+        <div class="callout callout-tr" data-step="4">
+            <svg class="arrow-svg" viewBox="0 0 180 150">
+                <path pathLength="100" d="M 30 138 C 70 125, 120 100, 152 58 C 160 38, 158 20, 160 10"/>
+                <polygon points="160,8 148,28 172,28"/>
+            </svg>
+            <div class="card">
+                <h3><i class="fa-solid fa-gear"></i> Settings &amp; Exit</h3>
+                <p>Tweak audio, camera, and display preferences, or leave when you're done.</p>
+            </div>
+        </div>
+
+        <!-- Step 5: Active sessions queue mock — centered, no arrow -->
+        <div class="welcome-card queue-card" data-step="5">
+            <div class="queue-header">
+                <div class="queue-title">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>Active sessions</span>
+                    <span class="queue-badge">3</span>
+                </div>
+                <p class="queue-subtitle">Visitors who follow your space link wait here. Any agent on your team can pick one up &mdash; first available wins.</p>
+            </div>
+
+            <div class="queue-table" role="table" aria-label="Active sessions queue">
+                <div class="queue-row queue-head" role="row">
+                    <div class="qcol qcol-name" role="columnheader"><i class="fa-solid fa-user"></i> Name</div>
+                    <div class="qcol qcol-wait" role="columnheader"><i class="fa-solid fa-clock"></i> Waiting time</div>
+                    <div class="qcol qcol-pin" role="columnheader"><i class="fa-solid fa-square-ellipsis"></i> Pincode</div>
+                    <div class="qcol qcol-act" role="columnheader" aria-label="Action"></div>
+                </div>
+                <div class="queue-row" role="row">
+                    <div class="qcol qcol-name" role="cell"><span class="qavatar">P</span> Participant</div>
+                    <div class="qcol qcol-wait" role="cell"><span class="qdot qdot-green"></span> 2m 14s</div>
+                    <div class="qcol qcol-pin" role="cell">4892</div>
+                    <div class="qcol qcol-act" role="cell"><span class="qpick">Join session <i class="fa-solid fa-arrow-up-right"></i></span></div>
+                </div>
+                <div class="queue-row" role="row">
+                    <div class="qcol qcol-name" role="cell"><span class="qavatar">P</span> Participant</div>
+                    <div class="qcol qcol-wait" role="cell"><span class="qdot qdot-orange"></span> 12m 48s</div>
+                    <div class="qcol qcol-pin" role="cell">&mdash;</div>
+                    <div class="qcol qcol-act" role="cell"><span class="qpick">Join session <i class="fa-solid fa-arrow-up-right"></i></span></div>
+                </div>
+                <div class="queue-row" role="row">
+                    <div class="qcol qcol-name" role="cell"><span class="qavatar">P</span> Participant</div>
+                    <div class="qcol qcol-wait" role="cell"><span class="qdot qdot-red"></span> 21m 03s</div>
+                    <div class="qcol qcol-pin" role="cell">1024</div>
+                    <div class="qcol qcol-act" role="cell"><span class="qpick">Join session <i class="fa-solid fa-arrow-up-right"></i></span></div>
+                </div>
+            </div>
+
+            <a class="cta queue-cta" href="https://webfu.se/studio/spaces/+ashish-support/active-sessions" target="_blank" rel="noopener noreferrer">
+                Open queue page
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </div>
+
+        <!-- Step 6: Launch — take it for a spin -->
+        <div class="welcome-card" data-step="6">
+            <div class="wave-badge rocket-badge">
+                <i class="fa-solid fa-rocket"></i>
+            </div>
+            <h1>Ready to <span class="accent">take it for a spin?</span></h1>
+            <p>Drop in your support page or any URL and we'll open it right here &mdash; just like a visitor would see it.</p>
+
+            <form class="launch-form-big" id="launchForm">
+                <div class="launch-row">
+                    <div class="launch-input-wrap">
+                        <i class="fa-solid fa-globe"></i>
+                        <input type="url" id="launchUrl" value="https://help.example.com" placeholder="https://example.com" required>
+                    </div>
+                    <button type="submit" class="cta launch-btn-big">
+                        Let's go
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tour navigation bar -->
+    <div class="tour-nav" id="tourNav">
+        <button class="btn-link" id="skipBtn" type="button">Skip tour</button>
+        <div class="divider"></div>
+        <div class="step-counter">
+            <span class="current" id="stepCurrent">1</span>
+            <span>/ 6</span>
+        </div>
+        <div class="dots" id="dots">
+            <button class="dot" data-goto="1" type="button" aria-label="Step 1"></button>
+            <button class="dot" data-goto="2" type="button" aria-label="Step 2"></button>
+            <button class="dot" data-goto="3" type="button" aria-label="Step 3"></button>
+            <button class="dot" data-goto="4" type="button" aria-label="Step 4"></button>
+            <button class="dot" data-goto="5" type="button" aria-label="Step 5"></button>
+            <button class="dot" data-goto="6" type="button" aria-label="Step 6"></button>
+        </div>
+        <div class="divider"></div>
+        <div class="nav-buttons">
+            <button class="btn-secondary" id="backBtn" type="button">
+                <i class="fa-solid fa-arrow-left"></i>
+                Back
+            </button>
+            <button class="btn-primary" id="nextBtn" type="button">
+                <span id="nextLabel">Next</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Done state -->
+    <div class="done-state" id="done">
+        <div class="rocket"><i class="fa-solid fa-rocket"></i></div>
+        <h2>You're all set!</h2>
+        <p>You can find these controls anytime around the edges of your screen. Happy assisting!</p>
+        <button class="btn-secondary" id="replayBtn" type="button">
+            <i class="fa-solid fa-rotate-left"></i>
+            Show the tour again
+        </button>
+        <a class="studio-link" href="https://webfu.se/studio">
+            or go back to Studio
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </a>
+
+        <div class="dismiss-hint">
+            <i class="fa-solid fa-lightbulb"></i>
+            <span>To hide this page next time, head to</span>
+            <span class="step-seq">
+                <span class="seq-icon" title="Settings"><i class="fa-solid fa-gear"></i></span>
+                <i class="fa-solid fa-chevron-right seq-sep"></i>
+                <span class="seq-icon" title="Toggles"><i class="fa-solid fa-toggle-on"></i></span>
+                <i class="fa-solid fa-chevron-right seq-sep"></i>
+                <span class="seq-label">Start page</span>
+            </span>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_STEPS = 6;
+
+        const steps       = document.querySelectorAll('[data-step]');
+        const tourNav     = document.getElementById('tourNav');
+        const done        = document.getElementById('done');
+        const startBtn    = document.getElementById('startBtn');
+        const backBtn     = document.getElementById('backBtn');
+        const nextBtn     = document.getElementById('nextBtn');
+        const nextLabel   = document.getElementById('nextLabel');
+        const skipBtn     = document.getElementById('skipBtn');
+        const replayBtn   = document.getElementById('replayBtn');
+        const stepCurrent = document.getElementById('stepCurrent');
+        const dots        = document.querySelectorAll('.dot');
+
+        let current = 0;        // 0 = welcome, 1-4 = tour steps
+        let furthest = 0;
+
+        function showStep(n) {
+            current = n;
+            furthest = Math.max(furthest, n);
+
+            steps.forEach(el => {
+                el.classList.toggle('active', Number(el.dataset.step) === n);
+            });
+
+            if (n === 0) {
+                tourNav.classList.remove('visible');
+            } else {
+                tourNav.classList.add('visible');
+                stepCurrent.textContent = n;
+                dots.forEach(d => {
+                    const goto = Number(d.dataset.goto);
+                    d.classList.toggle('active',  goto === n);
+                    d.classList.toggle('visited', goto < n || (goto !== n && goto <= furthest));
+                });
+                backBtn.disabled = (n === 1);
+                nextBtn.style.display = (n === TOTAL_STEPS) ? 'none' : '';
+            }
+        }
+
+        function finish() {
+            steps.forEach(el => el.classList.remove('active'));
+            tourNav.classList.remove('visible');
+            done.classList.add('visible');
+        }
+
+        function restart() {
+            done.classList.remove('visible');
+            furthest = 0;
+            showStep(0);
+        }
+
+        // Copy-to-clipboard for the meeting URL
+        const copyBtn    = document.getElementById('copyBtn');
+        const copyLabel  = document.getElementById('copyLabel');
+        const meetingUrl = document.getElementById('meetingUrl');
+        copyBtn.addEventListener('click', () => {
+            const text = meetingUrl.textContent.trim();
+            const reset = () => {
+                copyBtn.classList.remove('copied');
+                copyBtn.querySelector('i').className = 'fa-solid fa-copy';
+                copyLabel.textContent = 'Copy';
+            };
+            const flash = () => {
+                copyBtn.classList.add('copied');
+                copyBtn.querySelector('i').className = 'fa-solid fa-check';
+                copyLabel.textContent = 'Copied';
+                setTimeout(reset, 1600);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(flash).catch(() => {});
+            } else {
+                const tmp = document.createElement('textarea');
+                tmp.value = text;
+                document.body.appendChild(tmp);
+                tmp.select();
+                try { document.execCommand('copy'); flash(); } catch (e) {}
+                document.body.removeChild(tmp);
+            }
+        });
+
+        startBtn.addEventListener('click', () => showStep(1));
+        backBtn.addEventListener('click',  () => { if (current > 1) showStep(current - 1); });
+        nextBtn.addEventListener('click',  () => {
+            if (current < TOTAL_STEPS) showStep(current + 1);
+            else finish();
+        });
+        skipBtn.addEventListener('click',   finish);
+        replayBtn.addEventListener('click', restart);
+
+        dots.forEach(d => {
+            d.addEventListener('click', () => showStep(Number(d.dataset.goto)));
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (done.classList.contains('visible')) return;
+            const tag = e.target && e.target.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+            if (current === 0) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showStep(1); }
+                return;
+            }
+            if (e.key === 'ArrowRight' || e.key === 'Enter') {
+                e.preventDefault();
+                if (current < TOTAL_STEPS) showStep(current + 1);
+                else finish();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (current > 1) showStep(current - 1);
+            } else if (e.key === 'Escape') {
+                finish();
+            }
+        });
+
+        // Launch form: redirect the page to the URL entered
+        const launchForm = document.getElementById('launchForm');
+        const launchUrl  = document.getElementById('launchUrl');
+        launchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            let url = launchUrl.value.trim();
+            if (!url) return;
+            if (!/^[a-z][a-z0-9+\-.]*:\/\//i.test(url)) {
+                url = 'https://' + url;
+            }
+            window.location.href = url;
+        });
+
+        // Kick off on the welcome step
+        showStep(0);
+    </script>
+</body>
+</html>

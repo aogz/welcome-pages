@@ -1095,11 +1095,7 @@
                     d.classList.toggle('visited', goto < n || (goto !== n && goto <= furthest));
                 });
                 backBtn.disabled = (n === 1);
-                const isLast = (n === TOTAL_STEPS);
-                nextLabel.textContent = isLast ? 'Finish' : 'Next';
-                nextBtn.querySelector('i').className = isLast
-                    ? 'fa-solid fa-check'
-                    : 'fa-solid fa-arrow-right';
+                nextBtn.style.display = (n === TOTAL_STEPS) ? 'none' : '';
             }
         }
 
@@ -1159,6 +1155,8 @@
 
         document.addEventListener('keydown', (e) => {
             if (done.classList.contains('visible')) return;
+            const tag = e.target && e.target.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA') return;
             if (current === 0) {
                 if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showStep(1); }
                 return;
