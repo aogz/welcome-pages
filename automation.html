@@ -1532,7 +1532,7 @@
                 captchaStatus.className = 'captcha-status error';
                 captchaStatus.textContent = HUMAN_GIBES[(humanAttempts - 1) % HUMAN_GIBES.length];
                 if (humanAttempts >= 2) {
-                    captchaStatus.innerHTML += ' <span style="opacity:0.75">(hint: try <code>document.getElementById(\'captchaBox\').click()</code>)</span>';
+                    captchaStatus.innerHTML += ' <span style="opacity:0.75">(hint: use the <code>act.click</code> tool via MCP Inspector)</span>';
                 }
             } else {
                 captchaVerified = true;
